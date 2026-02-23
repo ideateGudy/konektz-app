@@ -20,7 +20,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   void _onRegister() {
-    BlocProvider.of<AuthBloc>(context).add(
+    context.read<AuthBloc>().add(
       RegisterEvent(
         username: _usernameController.text,
         email: _emailController.text,

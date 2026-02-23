@@ -24,7 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onRegister(RegisterEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
     try {
-      final user = await registerUseCase.call(
+      final user = await registerUseCase(
         event.username,
         event.email,
         event.password,
@@ -42,7 +42,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
     try {
-      final user = await loginUseCase.call(event.email, event.password);
+      final user = await loginUseCase(event.email, event.password);
       if (user.token != null) {
         await _storage.write(key: 'authToken', value: user.token);
       }
