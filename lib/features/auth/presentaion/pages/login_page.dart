@@ -6,6 +6,7 @@ import 'package:konektz/features/auth/presentaion/bloc/auth_state.dart';
 import 'package:konektz/features/auth/presentaion/widgets/auth_button.dart';
 import 'package:konektz/features/auth/presentaion/widgets/auth_input_field.dart';
 import 'package:konektz/features/auth/presentaion/widgets/register_login_prompt.dart';
+import 'package:konektz/features/auth/presentaion/widgets/snack_bar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -62,13 +63,11 @@ class _LoginPageState extends State<LoginPage> {
                   if (state is AuthAuthenticatedState) {
                     Navigator.pushNamedAndRemoveUntil(
                       context,
-                      '/chat',
+                      '/message',
                       (_) => false,
                     );
                   } else if (state is AuthErrorState) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(state.error)));
+                    showSnackBar(context, state.error, Colors.red.shade700);
                   }
                 },
                 builder: (context, state) {
