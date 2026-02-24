@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:konektz/features/auth/domain/usecases/login_use_case.dart';
 import 'package:konektz/features/auth/domain/usecases/register_use_case.dart';
+import 'package:konektz/features/auth/domain/validators/auth_validator.dart';
 import 'package:konektz/features/auth/presentaion/bloc/auth_event.dart';
 import 'package:konektz/features/auth/presentaion/bloc/auth_state.dart';
 
@@ -35,7 +36,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ),
       );
     } catch (e) {
-      emit(AuthErrorState(error: e.toString().replaceFirst('Exception: ', '')));
+      emit(
+        AuthErrorState(
+          error: e is ValidationException
+              ? e.first
+              : e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
     }
   }
 
@@ -49,7 +56,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _storage.write(key: 'userId', value: user.id);
       emit(AuthAuthenticatedState(user: user));
     } catch (e) {
-      emit(AuthErrorState(error: e.toString().replaceFirst('Exception: ', '')));
+      emit(
+        AuthErrorState(
+          error: e is ValidationException
+              ? e.first
+              : e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
     }
   }
 
