@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Konektz',
         theme: AppTheme.darkTheme,
-        home: const RegisterPage(),
+        home: const LoginPage(),
         routes: {
           '/login': (_) => const LoginPage(),
           '/register': (_) => const RegisterPage(),
