@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:konektz/features/auth/presentaion/bloc/auth_bloc.dart';
 import 'package:konektz/features/auth/presentaion/bloc/auth_event.dart';
 import 'package:konektz/features/auth/presentaion/bloc/auth_state.dart';
-import 'package:konektz/features/auth/presentaion/widgets/register_login_prompt.dart';
 import 'package:konektz/features/auth/presentaion/widgets/auth_button.dart';
 import 'package:konektz/features/auth/presentaion/widgets/auth_input_field.dart';
+import 'package:konektz/features/auth/presentaion/widgets/register_login_prompt.dart';
+import 'package:konektz/features/auth/presentaion/widgets/snack_bar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -69,11 +70,10 @@ class _RegisterPageState extends State<RegisterPage> {
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
                   if (state is AuthSuccessState) {
+                    showSnackBar(context, state.message, Colors.green.shade700);
                     Navigator.pushNamed(context, '/login');
                   } else if (state is AuthErrorState) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(state.error)));
+                    showSnackBar(context, state.error, Colors.red.shade700);
                   }
                 },
                 builder: (context, state) {
