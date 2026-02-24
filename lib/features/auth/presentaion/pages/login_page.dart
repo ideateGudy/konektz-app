@@ -6,7 +6,7 @@ import 'package:konektz/features/auth/presentaion/bloc/auth_state.dart';
 import 'package:konektz/features/auth/presentaion/widgets/auth_button.dart';
 import 'package:konektz/features/auth/presentaion/widgets/auth_input_field.dart';
 import 'package:konektz/features/auth/presentaion/widgets/register_login_prompt.dart';
-import 'package:konektz/features/auth/presentaion/widgets/snack_bar.dart';
+import 'package:konektz/core/presentation/widgets/snack_bar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
