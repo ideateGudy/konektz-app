@@ -16,6 +16,9 @@ A Flutter chat application built with **Clean Architecture** and **BLoC** state 
   - [Features](#features)
     - [Authentication](#authentication)
     - [Chat (in progress)](#chat-in-progress)
+  - [Domain Validation](#domain-validation)
+    - [Rules](#rules)
+    - [ValidationException](#validationexception)
   - [API Contract](#api-contract)
     - [POST `/register`](#post-register)
     - [POST `/login`](#post-login)
@@ -27,6 +30,7 @@ A Flutter chat application built with **Clean Architecture** and **BLoC** state 
     - [Physical Android device](#physical-android-device)
     - [Run](#run)
   - [State Management](#state-management)
+    - [Snack Bar Colors](#snack-bar-colors)
     - [Events (`sealed class AuthEvent`)](#events-sealed-class-authevent)
     - [States (`sealed class AuthState`)](#states-sealed-class-authstate)
     - [Secure Storage Keys](#secure-storage-keys)
@@ -97,9 +101,11 @@ lib/
     │   │   │   └── user_entity.dart              # Pure Dart user model
     │   │   ├── repositories/
     │   │   │   └── auth_repository.dart          # Abstract contract
-    │   │   └── usecases/
-    │   │       ├── login_use_case.dart
-    │   │       └── register_use_case.dart
+    │   │   ├── usecases/
+    │   │   │   ├── login_use_case.dart           # Validates then calls repository
+    │   │   │   └── register_use_case.dart        # Validates then calls repository
+    │   │   └── validators/
+    │   │       └── auth_validator.dart           # Pure Dart rules + ValidationException
     │   └── presentaion/
     │       ├── bloc/
     │       │   ├── auth_bloc.dart
@@ -111,7 +117,8 @@ lib/
     │       └── widgets/
     │           ├── auth_button.dart
     │           ├── auth_input_field.dart
-    │           └── register_login_prompt.dart
+    │           ├── register_login_prompt.dart
+    │           └── snack_bar.dart                # Custom styled snackbar helper
     └── chat/                        # (in progress)
 ```
 
@@ -121,10 +128,11 @@ lib/
 
 ### Authentication
 
-- **Register** — username, email, password → creates account via REST API
-- **Login** — email, password → returns JWT token stored securely
+- **Register** — username, email, password → validated in domain layer → creates account via REST API
+- **Login** — email, password → validated in domain layer → returns JWT token stored securely
 - **Logout** — clears all secure storage entries
-- Form validation feedback via SnackBar
+- Domain-layer validation fires before any network call (see [Domain Validation](#domain-validation))
+- Custom styled SnackBar for success (green) and error (red) feedback
 - Loading indicator while requests are in flight
 - Automatic navigation to chat on successful login
 
@@ -132,6 +140,43 @@ lib/
 
 - Message list view (`ChatPage`)
 - Individual message thread (`MessagePage`)
+
+---
+
+## Domain Validation
+
+All input is validated in `domain/validators/auth_validator.dart` — pure Dart, zero Flutter or HTTP imports. Validation runs **inside the use case**, before the repository is ever called, so no network request is wasted on bad input.
+
+### Rules
+
+| Field      | Rules                                                                |
+| ---------- | -------------------------------------------------------------------  |
+| `email`    | Required, must match RFC-5322 pattern                                |
+| `password` | Required, min 8 chars, at least 1 uppercase letter, at least 1 number|
+| `username` | Required, 3-30 chars, letters/numbers/underscores only               |
+
+All fields are evaluated before throwing, so a single `ValidationException` carries every error at once.
+
+### ValidationException
+
+```dart
+class ValidationException implements Exception {
+  final List<String> errors; // all collected errors
+  String get first => errors.first; // shown in SnackBar
+}
+```
+
+The BLoC catches `ValidationException` separately from generic exceptions:
+
+```dart
+catch (e) {
+  emit(AuthErrorState(
+    error: e is ValidationException
+        ? e.first          // clean single-line message
+        : e.toString()...  // network / server errors
+  ));
+}
+```
 
 ---
 
@@ -252,6 +297,16 @@ flutter run
 ## State Management
 
 BLoC is used for the `auth` feature. All classes use Dart 3 `sealed` types for exhaustive pattern matching.
+
+Errors from `ValidationException` (domain layer) are surfaced via `e.first` — a clean single-line string. Errors from the network/server come via `Exception.toString()` with the `Exception:` prefix stripped. Both are displayed using the custom `showSnackBar` helper.
+
+### Snack Bar Colors
+
+| Situation          | Color                   |
+| ------------------ | ----------------------- |
+| Validation error   | `Colors.red.shade700`   |
+| Network/API error  | `Colors.red.shade700`   |
+| Register success   | `Colors.green.shade700` |
 
 ### Events (`sealed class AuthEvent`)
 
