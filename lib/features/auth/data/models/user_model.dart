@@ -32,8 +32,8 @@ class UserModel extends UserEntity {
       id: user['id']?.toString() ?? '',
       email: user['email']?.toString() ?? '',
       username: user['username']?.toString() ?? '',
-      createdAt: user['created_at']?.toString(),
-      updatedAt: user['updated_at']?.toString(),
+      createdAt: user['createdAt']?.toString(),
+      updatedAt: user['updatedAt']?.toString(),
     );
   }
 
@@ -42,7 +42,7 @@ class UserModel extends UserEntity {
     'email': email,
     'username': username,
     if (token != null) 'token': token,
-    if (createdAt != null) 'created_at': createdAt,
-    if (updatedAt != null) 'updated_at': updatedAt,
+    if (createdAt != null) 'createdAt': createdAt,
+    if (updatedAt != null) 'updatedAt': updatedAt,
   };
 }
